@@ -11,10 +11,14 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 COPY . .
-RUN npm run build
+# Margen explícito para la compilación en servidores pequeños (4 GB de RAM + swap)
+RUN NODE_OPTIONS=--max-old-space-size=1536 npm run build
 
 FROM node:24-alpine AS runtime
+# Heap de V8 acotado por debajo del límite del contenedor (mem_limit por defecto 384m): el recolector
+# actúa antes de que el núcleo tenga que matar el proceso.
 ENV NODE_ENV=production \
+    NODE_OPTIONS=--max-old-space-size=256 \
     PORT=4000 \
     TZ=Europe/Madrid
 WORKDIR /app
