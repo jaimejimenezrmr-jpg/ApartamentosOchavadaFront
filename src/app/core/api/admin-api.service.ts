@@ -22,6 +22,10 @@ import {
   RoomResponse,
   RoomTypeRequest,
   RoomTypeResponse,
+  CreateStaffUserRequest,
+  StaffUser,
+  StaffUserWithTemporaryPassword,
+  UpdateStaffUserRequest,
   Uuid,
 } from './models';
 
@@ -152,6 +156,32 @@ export class AdminApiService {
 
   syncLocks(): Observable<{ updated: number; failed: number }> {
     return this.http.post<{ updated: number; failed: number }>(`${A}/locks/sync`, null);
+  }
+
+  // ------------------------------------------------------------------ usuarios
+
+  users(): Observable<StaffUser[]> {
+    return this.http.get<StaffUser[]>(`${A}/users`);
+  }
+
+  createUser(request: CreateStaffUserRequest): Observable<StaffUserWithTemporaryPassword> {
+    return this.http.post<StaffUserWithTemporaryPassword>(`${A}/users`, request);
+  }
+
+  updateUser(id: Uuid, request: UpdateStaffUserRequest): Observable<StaffUser> {
+    return this.http.put<StaffUser>(`${A}/users/${id}`, request);
+  }
+
+  resetUserPassword(id: Uuid): Observable<StaffUserWithTemporaryPassword> {
+    return this.http.post<StaffUserWithTemporaryPassword>(`${A}/users/${id}/reset-password`, null);
+  }
+
+  unlockUser(id: Uuid): Observable<StaffUser> {
+    return this.http.post<StaffUser>(`${A}/users/${id}/unlock`, null);
+  }
+
+  revokeUserSessions(id: Uuid): Observable<StaffUser> {
+    return this.http.post<StaffUser>(`${A}/users/${id}/revoke-sessions`, null);
   }
 
   // ------------------------------------------------------------------ Beds24

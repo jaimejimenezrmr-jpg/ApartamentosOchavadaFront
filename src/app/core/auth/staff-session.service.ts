@@ -1,4 +1,4 @@
-import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
@@ -81,6 +81,23 @@ export class StaffSessionService {
         shareReplay(1),
       );
     return this.refreshing;
+  }
+
+  /**
+   * Cambia la contraseña propia. El backend cierra todas las sesiones (también las de otros dispositivos)
+   * y devuelve una nueva para este navegador.
+   */
+  async changePassword(currentPassword: string, newPassword: string): Promise<CurrentUser> {
+    const token = await firstValueFrom(this.validToken());
+    const response = await firstValueFrom(
+      this.http.put<StaffTokenResponse>(
+        `${this.origin}/api/v1/auth/password`,
+        { currentPassword, newPassword },
+        { withCredentials: true, headers: new HttpHeaders({ Authorization: `Bearer ${token ?? ''}` }) },
+      ),
+    );
+    this.apply(response);
+    return response.user;
   }
 
   async logout(): Promise<void> {

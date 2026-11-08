@@ -22,6 +22,7 @@ const NAV: NavItem[] = [
   { path: 'cerraduras', label: 'Cerraduras', role: 'RECEPTIONIST' },
   { path: 'catalogo', label: 'Catálogo', role: 'ADMIN' },
   { path: 'canal', label: 'Channel manager', role: 'ADMIN' },
+  { path: 'usuarios', label: 'Usuarios', role: 'ADMIN' },
 ];
 
 @Component({
@@ -38,8 +39,8 @@ const NAV: NavItem[] = [
           }
         </nav>
         <div class="side__user">
-          <strong>{{ session.user()?.fullName }}</strong>
-          <span class="small">{{ roleLabel() }}</span>
+          <a routerLink="cuenta" class="side__account"><strong>{{ session.user()?.fullName }}</strong></a>
+          <span class="small">{{ roleLabel() }} · <a routerLink="cuenta">Mi cuenta</a></span>
           <button type="button" class="btn btn--secondary btn--sm" (click)="session.logout()">Cerrar sesión</button>
         </div>
       </aside>
@@ -71,6 +72,8 @@ const NAV: NavItem[] = [
     .side nav a.is-active { background: var(--c-brand); color: #fff; }
     .side__user { margin-top: auto; display: flex; flex-direction: column; gap: 6px; padding: 0 8px; }
     .side__user span { color: #b9ab9e; }
+    .side__user a { color: #f4eee7; }
+    .side__account { text-decoration: none; }
     .topbar { display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: var(--c-surface);
       border-bottom: 1px solid var(--c-border); position: sticky; top: 0; z-index: 20; }
     .quick { margin-left: auto; width: 220px; }
@@ -92,6 +95,8 @@ export class BackofficeLayoutComponent {
   protected readonly menuOpen = signal(false);
   protected readonly nav = computed(() => {
     this.session.user();
+    // Con contraseña temporal no se muestra el menú: solo puede ir a «Mi cuenta».
+    if (this.session.user()?.passwordChangeRequired) return [];
     return NAV.filter((item) => this.session.hasRole(item.role));
   });
   protected readonly roleLabel = computed(() => {

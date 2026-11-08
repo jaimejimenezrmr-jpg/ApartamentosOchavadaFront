@@ -11,6 +11,9 @@ const homeRedirect: CanActivateFn = async () => {
   const session = inject(StaffSessionService);
   const router = inject(Router);
   await session.restore();
+  if (session.user()?.passwordChangeRequired) {
+    return router.createUrlTree(['/backoffice', 'cuenta']);
+  }
   return router.createUrlTree(['/backoffice', session.hasRole('RECEPTIONIST') ? 'panel' : 'limpieza']);
 };
 const A = { role: 'ADMIN' };
@@ -43,6 +46,8 @@ export const BACKOFFICE_ROUTES: Routes = [
       { path: 'ses', data: R, title: 'SES.HOSPEDAJES · Backoffice', loadComponent: () => import('./ses/ses.page').then((m) => m.SesPage) },
       { path: 'cerraduras', data: R, title: 'Cerraduras · Backoffice', loadComponent: () => import('./locks/locks.page').then((m) => m.LocksPage) },
       { path: 'catalogo', data: A, title: 'Catálogo · Backoffice', loadComponent: () => import('./catalog/catalog.page').then((m) => m.CatalogPage) },
+      { path: 'usuarios', data: A, title: 'Usuarios · Backoffice', loadComponent: () => import('./users/users.page').then((m) => m.UsersPage) },
+      { path: 'cuenta', title: 'Mi cuenta · Backoffice', loadComponent: () => import('./account/account.page').then((m) => m.AccountPage) },
       { path: 'canal', data: A, title: 'Channel manager · Backoffice', loadComponent: () => import('./channel/channel.page').then((m) => m.ChannelPage) },
       { path: 'sin-permiso', title: 'Sin permiso · Backoffice', loadComponent: () => import('./forbidden.page').then((m) => m.ForbiddenPage) },
       { path: '**', redirectTo: () => inject(Router).createUrlTree(['/backoffice']) },

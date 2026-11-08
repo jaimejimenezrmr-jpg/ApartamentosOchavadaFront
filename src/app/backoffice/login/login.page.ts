@@ -51,7 +51,11 @@ export class LoginPage {
     this.error.set(null);
     try {
       const { email, password } = this.form.getRawValue();
-      await this.session.login(email.trim(), password);
+      const user = await this.session.login(email.trim(), password);
+      if (user.passwordChangeRequired) {
+        await this.router.navigateByUrl('/backoffice/cuenta');
+        return;
+      }
       const target = this.returnUrl();
       await this.router.navigateByUrl(target && target.startsWith('/backoffice') ? target : '/backoffice');
     } catch (e) {

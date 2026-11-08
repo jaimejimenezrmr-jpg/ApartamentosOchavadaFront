@@ -293,8 +293,51 @@ export interface CurrentUser {
   id: Uuid;
   email: string;
   fullName: string;
+  phone: string | null;
   role: UserRole;
   lastLoginAt: IsoInstant | null;
+  /** Contraseña temporal: hay que cambiarla antes de usar el backoffice. */
+  passwordChangeRequired: boolean;
+  passwordChangedAt: IsoInstant | null;
+}
+
+// ------------------------------------------------------------------ usuarios del backoffice
+
+export interface StaffUser {
+  id: Uuid;
+  email: string;
+  fullName: string;
+  phone: string | null;
+  role: UserRole;
+  enabled: boolean;
+  locked: boolean;
+  lockedUntil: IsoInstant | null;
+  passwordChangeRequired: boolean;
+  lastLoginAt: IsoInstant | null;
+  passwordChangedAt: IsoInstant | null;
+  createdAt: IsoInstant;
+  version: number;
+}
+
+export interface CreateStaffUserRequest {
+  email: string;
+  fullName: string;
+  phone: string | null;
+  role: UserRole;
+}
+
+export interface UpdateStaffUserRequest {
+  fullName: string;
+  phone: string | null;
+  role: UserRole;
+  enabled: boolean;
+  version: number;
+}
+
+/** La contraseña temporal solo llega en esta respuesta. */
+export interface StaffUserWithTemporaryPassword {
+  user: StaffUser;
+  temporaryPassword: string;
 }
 
 export interface StaffTokenResponse {
