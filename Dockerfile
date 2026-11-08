@@ -15,7 +15,7 @@ COPY . .
 RUN NODE_OPTIONS=--max-old-space-size=1536 npm run build
 
 FROM node:24-alpine AS runtime
-# Heap de V8 acotado por debajo del límite del contenedor (mem_limit por defecto 384m): el recolector
+# Heap de V8 acotado por debajo del límite del contenedor (mem_limit de 384m a 512m): el recolector
 # actúa antes de que el núcleo tenga que matar el proceso.
 ENV NODE_ENV=production \
     NODE_OPTIONS=--max-old-space-size=256 \
