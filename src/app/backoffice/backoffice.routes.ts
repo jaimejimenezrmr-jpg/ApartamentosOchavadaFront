@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, Routes } from '@angular/router';
 import { StaffSessionService } from '../core/auth/staff-session.service';
-import { staffGuard } from '../core/auth/guards';
+import { homeUrlFor, staffGuard } from '../core/auth/guards';
 import { BackofficeLayoutComponent } from './layout/backoffice-layout.component';
 
 const R = { role: 'RECEPTIONIST' };
@@ -14,7 +14,7 @@ const homeRedirect: CanActivateFn = async () => {
   if (session.user()?.passwordChangeRequired) {
     return router.createUrlTree(['/backoffice', 'cuenta']);
   }
-  return router.createUrlTree(['/backoffice', session.hasRole('RECEPTIONIST') ? 'panel' : 'limpieza']);
+  return router.createUrlTree([homeUrlFor(session)]);
 };
 const A = { role: 'ADMIN' };
 

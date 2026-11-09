@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angu
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { problemMessage } from '../../core/api/problem';
+import { JARVIS_URL, homeUrlFor } from '../../core/auth/guards';
 import { StaffSessionService } from '../../core/auth/staff-session.service';
 
 @Component({
@@ -57,7 +58,9 @@ export class LoginPage {
         return;
       }
       const target = this.returnUrl();
-      await this.router.navigateByUrl(target && target.startsWith('/backoffice') ? target : '/backoffice');
+      // Solo se vuelve a rutas internas del personal (evita redirecciones abiertas con returnUrl).
+      const internal = !!target && (target.startsWith('/backoffice') || target.startsWith(JARVIS_URL));
+      await this.router.navigateByUrl(internal && target ? target : homeUrlFor(this.session));
     } catch (e) {
       this.error.set(problemMessage(e));
       this.form.controls.password.reset();

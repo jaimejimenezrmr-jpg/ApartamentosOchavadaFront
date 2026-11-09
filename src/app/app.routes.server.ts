@@ -8,6 +8,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
 export const serverRoutes: ServerRoute[] = [
   { path: 'backoffice', renderMode: RenderMode.Client },
   { path: 'backoffice/**', renderMode: RenderMode.Client },
+  { path: 'jarvis', renderMode: RenderMode.Client },
   { path: 'mi-estancia', renderMode: RenderMode.Client },
   { path: 'reservar', renderMode: RenderMode.Client },
   { path: 'reservar/**', renderMode: RenderMode.Client },

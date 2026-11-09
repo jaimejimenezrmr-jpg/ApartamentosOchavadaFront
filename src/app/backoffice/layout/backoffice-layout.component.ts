@@ -36,6 +36,9 @@ const NAV: NavItem[] = [
     <div class="shell" [class.is-open]="menuOpen()">
       <aside class="side no-print">
         <a routerLink="/backoffice" class="side__brand">Ochavada <span>PMS</span></a>
+        @if (session.hasRole('ADMIN') && nav().length) {
+          <a routerLink="/jarvis" class="side__jarvis">Jarvis · centro de control</a>
+        }
         <nav aria-label="Backoffice">
           @for (item of nav(); track item.path) {
             <a [routerLink]="item.path" routerLinkActive="is-active" (click)="menuOpen.set(false)">{{ item.label }}</a>
@@ -69,6 +72,9 @@ const NAV: NavItem[] = [
       position: sticky; top: 0; height: 100vh; }
     .side__brand { color: #fff; text-decoration: none; font: 600 1.25rem var(--font-display); padding: 0 8px; }
     .side__brand span { color: var(--c-accent); }
+    .side__jarvis { display: block; padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.18); border-radius: var(--radius-sm);
+      color: #fff; text-decoration: none; font-weight: 600; text-align: center; }
+    .side__jarvis:hover { background: rgba(255, 255, 255, 0.08); }
     .side nav { display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
     .side nav a { color: #d9cfc4; text-decoration: none; padding: 8px 10px; border-radius: var(--radius-sm); font-weight: 500; }
     .side nav a:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }

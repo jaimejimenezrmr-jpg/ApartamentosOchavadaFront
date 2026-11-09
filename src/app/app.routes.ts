@@ -9,6 +9,14 @@ export const routes: Routes = [
     loadComponent: () => import('./backoffice/login/login.page').then((m) => m.LoginPage),
   },
   {
+    // Centro de control del administrador: accesos a todas las pantallas de gestión.
+    path: 'jarvis',
+    canActivate: [staffGuard],
+    data: { role: 'ADMIN' },
+    title: 'Jarvis · Centro de control',
+    loadComponent: () => import('./jarvis/jarvis.page').then((m) => m.JarvisPage),
+  },
+  {
     path: 'backoffice',
     canActivate: [staffGuard],
     loadChildren: () => import('./backoffice/backoffice.routes').then((m) => m.BACKOFFICE_ROUTES),

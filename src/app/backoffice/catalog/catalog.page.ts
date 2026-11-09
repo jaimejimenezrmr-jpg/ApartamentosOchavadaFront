@@ -1,10 +1,18 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { AmenitiesComponent } from './amenities.component';
 import { RatePlansComponent } from './rate-plans.component';
 import { RoomTypesComponent } from './room-types.component';
 import { RoomsComponent } from './rooms.component';
 
 type Tab = 'types' | 'rooms' | 'plans' | 'amenities';
+
+/** Secciones enlazables desde fuera: /backoffice/catalogo?seccion=unidades (p. ej. desde Jarvis). */
+const SECTIONS: Record<string, Tab> = {
+  tipologias: 'types',
+  unidades: 'rooms',
+  planes: 'plans',
+  servicios: 'amenities',
+};
 
 @Component({
   selector: 'app-catalog-page',
@@ -27,5 +35,7 @@ type Tab = 'types' | 'rooms' | 'plans' | 'amenities';
   `,
 })
 export class CatalogPage {
-  protected readonly tab = signal<Tab>('types');
+  /** Parámetro de consulta `seccion`. */
+  readonly seccion = input<string>();
+  protected readonly tab = linkedSignal<Tab>(() => SECTIONS[this.seccion() ?? ''] ?? 'types');
 }

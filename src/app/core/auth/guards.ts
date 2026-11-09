@@ -4,6 +4,14 @@ import { UserRole } from '../api/models';
 import { StaffSessionService } from './staff-session.service';
 
 export const ACCOUNT_URL = '/backoffice/cuenta';
+/** Centro de control: punto de entrada del administrador. */
+export const JARVIS_URL = '/jarvis';
+
+/** Página de inicio según el perfil: administración entra en Jarvis; recepción, al panel; limpieza, a su tablero. */
+export function homeUrlFor(session: StaffSessionService): string {
+  if (session.hasRole('ADMIN')) return JARVIS_URL;
+  return session.hasRole('RECEPTIONIST') ? '/backoffice/panel' : '/backoffice/limpieza';
+}
 
 /** Exige sesión del personal con al menos el rol indicado en `data.role` (por defecto, HOUSEKEEPING). */
 export const staffGuard: CanActivateFn = async (route, state) => {
@@ -23,10 +31,10 @@ export const staffGuard: CanActivateFn = async (route, state) => {
   return session.hasRole(required) ? true : router.createUrlTree(['/backoffice/sin-permiso']);
 };
 
-/** En el login: si ya hay sesión, directamente al panel. */
+/** En el login: si ya hay sesión, directamente a su página de inicio. */
 export const loginGuard: CanActivateFn = async () => {
   const session = inject(StaffSessionService);
   const router = inject(Router);
   await session.restore();
-  return session.isAuthenticated() ? router.createUrlTree(['/backoffice']) : true;
+  return session.isAuthenticated() ? router.createUrlTree([homeUrlFor(session)]) : true;
 };
