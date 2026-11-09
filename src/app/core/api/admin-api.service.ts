@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  ChecklistTemplate,
+  ChecklistTemplateRequest,
   Amenity,
   AmenityRequest,
   Beds24PollSummary,
@@ -212,5 +214,19 @@ export class AdminApiService {
 
   beds24ImportBooking(bookingId: number): Observable<{ result: ImportResult }> {
     return this.http.post<{ result: ImportResult }>(`${A}/channel/beds24/bookings/${bookingId}/import`, null);
+  }
+
+  // ------------------------------------------------------------------ listas de comprobación de limpieza
+
+  checklists(): Observable<ChecklistTemplate[]> {
+    return this.http.get<ChecklistTemplate[]>(`${A}/checklists`);
+  }
+
+  createChecklist(request: ChecklistTemplateRequest): Observable<ChecklistTemplate> {
+    return this.http.post<ChecklistTemplate>(`${A}/checklists`, request);
+  }
+
+  updateChecklist(id: Uuid, request: ChecklistTemplateRequest): Observable<ChecklistTemplate> {
+    return this.http.put<ChecklistTemplate>(`${A}/checklists/${id}`, request);
   }
 }

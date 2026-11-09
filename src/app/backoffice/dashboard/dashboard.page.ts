@@ -3,10 +3,17 @@ import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { BackofficeApiService } from '../../core/api/backoffice-api.service';
-import { HousekeepingStatus, ReservationSummary } from '../../core/api/models';
+import { DashboardResponse, ReservationSummary } from '../../core/api/models';
 import { problemMessage } from '../../core/api/problem';
 import { addDays, todayInProperty } from '../../core/util/dates';
-import { CHANNEL, HOUSEKEEPING_STATUS, RESERVATION_STATUS, housekeepingTone, reservationTone } from '../../shared/labels';
+import { CHANNEL, HOUSEKEEPING_FLOW, HOUSEKEEPING_STATUS, RESERVATION_STATUS, housekeepingTone, reservationTone } from '../../shared/labels';
+
+interface Exception {
+  value: number;
+  label: string;
+  tone: 'danger' | 'warning' | 'info';
+  link: string;
+}
 
 @Component({
   selector: 'app-dashboard-page',
@@ -35,6 +42,28 @@ import { CHANNEL, HOUSEKEEPING_STATUS, RESERVATION_STATUS, housekeepingTone, res
           <small>ADR {{ d.adrMonthToDate | currency: d.currency }} · RevPAR {{ d.revparMonthToDate | currency: d.currency }}</small></div>
         <div class="card kpi"><span>Facturado del mes</span><strong>{{ d.invoicedMonthToDate | currency: d.currency: 'symbol': '1.0-0' }}</strong></div>
       </div>
+
+      <section class="card ops">
+        <div class="card__title"><h2>Operaciones de hoy</h2><a routerLink="/backoffice/limpieza" class="small">Tablero de limpieza</a></div>
+        <div class="flow">
+          @for (s of hkStatuses; track s) {
+            <a routerLink="/backoffice/limpieza" class="flow__step flow__step--{{ hkTone(s) }}">
+              <strong>{{ d.roomsByHousekeepingStatus[s] ?? 0 }}</strong><span>{{ hkLabel[s] }}</span>
+            </a>
+          }
+        </div>
+        @if (exceptions(d).length) {
+          <ul class="exceptions">
+            @for (e of exceptions(d); track e.label) {
+              <li class="exception exception--{{ e.tone }}">
+                <a [routerLink]="e.link"><strong>{{ e.value }}</strong> {{ e.label }}</a>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="ok">✓ Sin incidencias ni retrasos: todo en orden.</p>
+        }
+      </section>
 
       @if (d.unassignedArrivals || d.sesReportsOverdue || d.sesReportsNeedingAction || d.pendingPaymentHolds) {
         <div class="stack alerts">
@@ -89,17 +118,6 @@ import { CHANNEL, HOUSEKEEPING_STATUS, RESERVATION_STATUS, housekeepingTone, res
             </table>
           </div>
         </section>
-        <section class="card">
-          <div class="card__title"><h2>Limpieza</h2><a routerLink="/backoffice/limpieza" class="small">Tablero</a></div>
-          <p>{{ d.openHousekeepingTasks }} tarea(s) abiertas.</p>
-          <div class="row">
-            @for (s of hkStatuses; track s) {
-              @if (d.roomsByHousekeepingStatus[s]) {
-                <span class="badge badge--{{ hkTone(s) }}">{{ hkLabel[s] }}: {{ d.roomsByHousekeepingStatus[s] }}</span>
-              }
-            }
-          </div>
-        </section>
       </div>
     }
   `,
@@ -114,6 +132,22 @@ import { CHANNEL, HOUSEKEEPING_STATUS, RESERVATION_STATUS, housekeepingTone, res
     .kpi strong { font: 600 1.7rem var(--font-display); }
     .kpi small { color: var(--c-text-muted); }
     .alerts { margin-top: 16px; }
+    .ops { margin-top: 16px; }
+    .flow { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    .flow__step { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: var(--radius-sm);
+      background: var(--c-surface-alt); border-left: 4px solid var(--c-border); text-decoration: none; color: inherit; }
+    .flow__step strong { font: 600 1.5rem var(--font-display); }
+    .flow__step span { font-size: 0.8rem; color: var(--c-text-muted); }
+    .flow__step--success { border-left-color: var(--c-success); }
+    .flow__step--info { border-left-color: var(--c-info); }
+    .flow__step--warning { border-left-color: var(--c-warning); }
+    .flow__step--danger { border-left-color: var(--c-danger); }
+    .exceptions { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+    .exception a { display: inline-block; padding: 6px 12px; border-radius: 999px; text-decoration: none; font-size: 0.9rem; }
+    .exception--danger a { background: var(--c-danger-soft); color: var(--c-danger); }
+    .exception--warning a { background: var(--c-warning-soft); color: var(--c-warning); }
+    .exception--info a { background: var(--c-info-soft); color: var(--c-info); }
+    .ok { margin: 12px 0 0; color: var(--c-success); font-weight: 500; }
     .cols { display: grid; gap: 16px; margin-top: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); align-items: start; }
     .cols .card + .card { margin-top: 0; }
   `,
@@ -124,13 +158,29 @@ export class DashboardPage {
   protected readonly status = RESERVATION_STATUS;
   protected readonly channel = CHANNEL;
   protected readonly hkLabel = HOUSEKEEPING_STATUS;
-  protected readonly hkStatuses: HousekeepingStatus[] = ['DIRTY', 'IN_PROGRESS', 'CLEAN', 'INSPECTED', 'OUT_OF_SERVICE'];
+  protected readonly hkStatuses = HOUSEKEEPING_FLOW;
   protected readonly tone = reservationTone;
   protected readonly hkTone = housekeepingTone;
 
   protected readonly date = signal(todayInProperty());
   protected readonly data = apiResource({ params: () => this.date(), stream: ({ params }) => this.api.dashboard(params) });
   protected readonly error = computed(() => problemMessage(this.data.error()));
+
+  /** Solo lo que requiere atención: el sistema muestra las excepciones, no hay que buscarlas. */
+  protected exceptions(d: DashboardResponse): Exception[] {
+    const o = d.operations;
+    const all: Exception[] = [
+      { value: o.openIncidentsP1, label: 'incidencia(s) P1 · emergencia', tone: 'danger', link: '/backoffice/incidencias' },
+      { value: o.arrivalsNotReady, label: 'llegada(s) de hoy con la unidad aún no LISTA', tone: 'danger', link: '/backoffice/limpieza' },
+      { value: o.overdueTasks, label: 'limpieza(s) fuera de hora', tone: 'warning', link: '/backoffice/limpieza' },
+      { value: o.openIncidentsP2, label: 'incidencia(s) P2 · afecta a la estancia', tone: 'warning', link: '/backoffice/incidencias' },
+      { value: o.tasksAwaitingInspection, label: 'limpieza(s) por inspeccionar', tone: 'info', link: '/backoffice/limpieza' },
+      { value: o.locksLowBattery, label: 'cerradura(s) con batería baja', tone: 'warning', link: '/backoffice/cerraduras' },
+      { value: o.openIncidents - o.openIncidentsP1 - o.openIncidentsP2, label: 'otra(s) incidencia(s) abierta(s)', tone: 'info', link: '/backoffice/incidencias' },
+      { value: o.openLostItems, label: 'objeto(s) olvidado(s) pendiente(s)', tone: 'info', link: '/backoffice/objetos-olvidados' },
+    ];
+    return all.filter((e) => e.value > 0);
+  }
 
   protected shift(days: number): void {
     this.date.set(addDays(this.date(), days));

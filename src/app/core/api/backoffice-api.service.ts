@@ -8,10 +8,18 @@ import {
   GuestRequest,
   GuestSummary,
   HousekeepingStatus,
+  IncidentPriority,
+  IncidentRequest,
+  IncidentResponse,
+  IncidentStatus,
   InvoiceResponse,
   IsoDate,
   IssueInvoiceRequest,
   LockResponse,
+  LostItemRequest,
+  LostItemResponse,
+  LostItemStatus,
+  MediaResponse,
   ManualReservationRequest,
   PageResponse,
   PropertyPaymentRequest,
@@ -27,11 +35,14 @@ import {
   ReservationSummary,
   RoomBlockRequest,
   RoomBlockResponse,
+  RoomBoardItem,
   RoomResponse,
   SesReportDetail,
   SesReportStatus,
   SesReportSummary,
   StayChangeRequest,
+  TaskCheck,
+  TaskDetail,
   TaskRequest,
   TaskResponse,
   TaskStatus,
@@ -210,8 +221,33 @@ export class BackofficeApiService {
     return this.http.post<TaskResponse>(`${B}/housekeeping/tasks/${id}/complete`, notes ? { notes } : null);
   }
 
+  task(id: Uuid): Observable<TaskDetail> {
+    return this.http.get<TaskDetail>(`${B}/housekeeping/tasks/${id}`);
+  }
+
+  markCheck(taskId: Uuid, checkId: Uuid, checked: boolean, comment: string | null): Observable<TaskCheck> {
+    return this.http.put<TaskCheck>(`${B}/housekeeping/tasks/${taskId}/checks/${checkId}`, { checked, comment });
+  }
+
+  uploadCheckPhoto(taskId: Uuid, checkId: Uuid, photo: Blob): Observable<MediaResponse> {
+    return this.http.post<MediaResponse>(`${B}/housekeeping/tasks/${taskId}/checks/${checkId}/photos`, photoForm(photo));
+  }
+
+  deleteCheckPhoto(taskId: Uuid, checkId: Uuid, mediaId: Uuid): Observable<void> {
+    return this.http.delete<void>(`${B}/housekeeping/tasks/${taskId}/checks/${checkId}/photos/${mediaId}`);
+  }
+
+  /** Inspección superada: la unidad queda LISTA (cualquier miembro del personal salvo quien limpió). */
   verifyTask(id: Uuid): Observable<TaskResponse> {
     return this.http.post<TaskResponse>(`${B}/housekeeping/tasks/${id}/verify`, null);
+  }
+
+  rejectTask(id: Uuid, reason: string): Observable<TaskResponse> {
+    return this.http.post<TaskResponse>(`${B}/housekeeping/tasks/${id}/reject`, { reason });
+  }
+
+  housekeepingRooms(): Observable<RoomBoardItem[]> {
+    return this.http.get<RoomBoardItem[]>(`${B}/housekeeping/rooms`);
   }
 
   cancelTask(id: Uuid): Observable<TaskResponse> {
@@ -220,6 +256,59 @@ export class BackofficeApiService {
 
   changeRoomHousekeeping(roomId: Uuid, status: HousekeepingStatus): Observable<RoomResponse> {
     return this.http.put<RoomResponse>(`${B}/housekeeping/rooms/${roomId}/status`, { status });
+  }
+
+  // ------------------------------------------------------------------ incidencias (listado y gestión: recepción)
+
+  incidents(filter: { status?: IncidentStatus | null; activeOnly?: boolean; priority?: IncidentPriority | null; roomId?: Uuid | null }): Observable<IncidentResponse[]> {
+    let params = new HttpParams().set('activeOnly', String(filter.activeOnly ?? true));
+    if (filter.status) params = params.set('status', filter.status);
+    if (filter.priority) params = params.set('priority', filter.priority);
+    if (filter.roomId) params = params.set('roomId', filter.roomId);
+    return this.http.get<IncidentResponse[]>(`${B}/incidents`, { params });
+  }
+
+  createIncident(request: IncidentRequest): Observable<IncidentResponse> {
+    return this.http.post<IncidentResponse>(`${B}/incidents`, request);
+  }
+
+  changeIncidentStatus(id: Uuid, status: IncidentStatus, notes: string | null, version: number): Observable<IncidentResponse> {
+    return this.http.post<IncidentResponse>(`${B}/incidents/${id}/status`, { status, notes, version });
+  }
+
+  changeIncidentPriority(id: Uuid, priority: IncidentPriority, version: number): Observable<IncidentResponse> {
+    return this.http.put<IncidentResponse>(`${B}/incidents/${id}/priority`, { priority, version });
+  }
+
+  uploadIncidentPhoto(id: Uuid, photo: Blob): Observable<MediaResponse> {
+    return this.http.post<MediaResponse>(`${B}/incidents/${id}/photos`, photoForm(photo));
+  }
+
+  // ------------------------------------------------------------------ objetos olvidados
+
+  lostItems(openOnly: boolean): Observable<LostItemResponse[]> {
+    return this.http.get<LostItemResponse[]>(`${B}/lost-items`, { params: new HttpParams().set('openOnly', String(openOnly)) });
+  }
+
+  createLostItem(request: LostItemRequest): Observable<LostItemResponse> {
+    return this.http.post<LostItemResponse>(`${B}/lost-items`, request);
+  }
+
+  updateLostItem(id: Uuid, storageLocation: string | null, notes: string | null, version: number): Observable<LostItemResponse> {
+    return this.http.put<LostItemResponse>(`${B}/lost-items/${id}`, { storageLocation, notes, version });
+  }
+
+  changeLostItemStatus(id: Uuid, status: LostItemStatus, version: number): Observable<LostItemResponse> {
+    return this.http.post<LostItemResponse>(`${B}/lost-items/${id}/status`, { status, version });
+  }
+
+  uploadLostItemPhoto(id: Uuid, photo: Blob): Observable<MediaResponse> {
+    return this.http.post<MediaResponse>(`${B}/lost-items/${id}/photos`, photoForm(photo));
+  }
+
+  /** Foto protegida: se descarga con la sesión del personal (un <img src> no enviaría el token). */
+  media(id: Uuid): Observable<Blob> {
+    return this.http.get(`${B}/media/${id}`, { responseType: 'blob' });
   }
 
   // ------------------------------------------------------------------ facturación
@@ -278,4 +367,10 @@ export class BackofficeApiService {
       params: new HttpParams().set('from', from).set('to', to).set('page', page).set('size', 50),
     });
   }
+}
+
+function photoForm(photo: Blob): FormData {
+  const form = new FormData();
+  form.append('file', photo, 'foto.jpg');
+  return form;
 }

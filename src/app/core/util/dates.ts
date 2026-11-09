@@ -89,3 +89,12 @@ function parse(date: IsoDate): Date {
 function format(d: Date): IsoDate {
   return d.toISOString().slice(0, 10);
 }
+
+/** Tiempo transcurrido en formato breve: «4 min», «3 h», «2 días» (centro de incidencias, objetos olvidados). */
+export function elapsedSince(instant: string, now: number = Date.now()): string {
+  const minutes = Math.max(0, Math.floor((now - new Date(instant).getTime()) / 60_000));
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours} h`;
+  return `${Math.floor(hours / 24)} días`;
+}

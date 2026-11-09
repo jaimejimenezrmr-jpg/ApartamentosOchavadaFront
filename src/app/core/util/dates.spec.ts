@@ -1,4 +1,4 @@
-import { addDays, addMonths, eachDay, isIsoDate, nightsBetween, startOfMonth, startOfWeek, todayInProperty, weekdayIndex } from './dates';
+import { addDays, addMonths, eachDay, elapsedSince, isIsoDate, nightsBetween, startOfMonth, startOfWeek, todayInProperty, weekdayIndex } from './dates';
 
 describe('dates', () => {
   it('suma días cruzando meses, años y el cambio de hora', () => {
@@ -35,5 +35,13 @@ describe('dates', () => {
     expect(todayInProperty(new Date('2026-07-14T22:30:00Z'))).toBe('2026-07-15');
     expect(todayInProperty(new Date('2026-12-31T22:59:00Z'))).toBe('2026-12-31');
     expect(todayInProperty(new Date('2026-12-31T23:01:00Z'))).toBe('2027-01-01');
+  });
+
+  it('muestra el tiempo transcurrido de forma breve', () => {
+    const now = Date.parse('2026-11-09T12:00:00Z');
+    expect(elapsedSince('2026-11-09T11:56:00Z', now)).toBe('4 min');
+    expect(elapsedSince('2026-11-09T09:00:00Z', now)).toBe('3 h');
+    expect(elapsedSince('2026-11-06T12:00:00Z', now)).toBe('3 días');
+    expect(elapsedSince('2026-11-09T12:05:00Z', now)).toBe('0 min');
   });
 });

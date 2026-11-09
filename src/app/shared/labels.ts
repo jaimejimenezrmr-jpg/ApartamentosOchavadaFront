@@ -4,8 +4,12 @@ import {
   DayOfWeek,
   DocumentType,
   HousekeepingStatus,
+  IncidentOrigin,
+  IncidentPriority,
+  IncidentStatus,
   InvoiceType,
   LockType,
+  LostItemStatus,
   MealPlan,
   PaymentMode,
   PaymentProvider,
@@ -98,13 +102,29 @@ export const ROOM_STATUS: Record<RoomStatus, string> = {
   INACTIVE: 'Inactiva',
 };
 
+/**
+ * Ciclo de la unidad: salida → pendiente de limpieza → en limpieza → limpio (pendiente de inspección) → LISTO.
+ * Solo «Listo» puede recibir huéspedes.
+ */
 export const HOUSEKEEPING_STATUS: Record<HousekeepingStatus, string> = {
-  CLEAN: 'Limpia',
-  DIRTY: 'Sucia',
-  IN_PROGRESS: 'Limpiando',
-  INSPECTED: 'Revisada',
+  DIRTY: 'Pendiente de limpieza',
+  IN_PROGRESS: 'En limpieza',
+  CLEAN: 'Limpio · pendiente de inspección',
+  INSPECTED: 'Listo',
   OUT_OF_SERVICE: 'Fuera de servicio',
 };
+
+/** Versión corta para chapas y selectores estrechos. */
+export const HOUSEKEEPING_STATUS_SHORT: Record<HousekeepingStatus, string> = {
+  DIRTY: 'Pendiente',
+  IN_PROGRESS: 'Limpiando',
+  CLEAN: 'Por inspeccionar',
+  INSPECTED: 'Listo',
+  OUT_OF_SERVICE: 'Fuera de servicio',
+};
+
+/** Orden del ciclo de limpieza (para selectores y recuentos). */
+export const HOUSEKEEPING_FLOW: HousekeepingStatus[] = ['DIRTY', 'IN_PROGRESS', 'CLEAN', 'INSPECTED', 'OUT_OF_SERVICE'];
 
 export const BLOCK_TYPE: Record<BlockType, string> = {
   MAINTENANCE: 'Mantenimiento',
@@ -127,9 +147,45 @@ export const AMENITY_CATEGORY: Record<AmenityCategory, string> = {
 export const TASK_STATUS: Record<TaskStatus, string> = {
   PENDING: 'Pendiente',
   IN_PROGRESS: 'En curso',
-  DONE: 'Hecha',
-  VERIFIED: 'Verificada',
+  DONE: 'Por inspeccionar',
+  VERIFIED: 'Inspeccionada',
   CANCELLED: 'Cancelada',
+};
+
+export const INCIDENT_PRIORITY: Record<IncidentPriority, string> = {
+  P1: 'P1 · Emergencia',
+  P2: 'P2 · Afecta a la estancia',
+  P3: 'P3 · Normal',
+  P4: 'P4 · Preventivo / mejora',
+};
+
+export const INCIDENT_PRIORITY_HELP: Record<IncidentPriority, string> = {
+  P1: 'Fuga importante, seguridad, huésped sin poder entrar, fallo eléctrico grave. Actuación inmediata.',
+  P2: 'Sin climatización, sin agua caliente, cerradura con problemas. Atención prioritaria.',
+  P3: 'Bombilla, mando, pequeño desperfecto. Se puede programar.',
+  P4: 'Pintura, ajustes, desgaste. Mejora futura.',
+};
+
+export const INCIDENT_STATUS: Record<IncidentStatus, string> = {
+  OPEN: 'Abierta',
+  IN_PROGRESS: 'En curso',
+  RESOLVED: 'Resuelta',
+  CLOSED: 'Cerrada',
+  CANCELLED: 'Anulada',
+};
+
+export const INCIDENT_ORIGIN: Record<IncidentOrigin, string> = {
+  HOUSEKEEPING: 'Limpieza',
+  STAFF: 'Personal',
+  GUEST: 'Huésped',
+};
+
+export const LOST_ITEM_STATUS: Record<LostItemStatus, string> = {
+  STORED: 'Guardado',
+  GUEST_NOTIFIED: 'Huésped avisado',
+  SHIPPED: 'Enviado',
+  COLLECTED: 'Recogido',
+  DISCARDED: 'Desechado',
 };
 
 export const TASK_TYPE: Record<TaskType, string> = {
@@ -259,13 +315,27 @@ export function sesTone(status: SesReportStatus): string {
 
 export function housekeepingTone(status: HousekeepingStatus): string {
   switch (status) {
-    case 'CLEAN':
     case 'INSPECTED':
       return 'success';
+    case 'CLEAN':
+      return 'info';
     case 'DIRTY':
       return 'danger';
     case 'IN_PROGRESS':
       return 'warning';
+    default:
+      return 'neutral';
+  }
+}
+
+export function incidentTone(priority: IncidentPriority): string {
+  switch (priority) {
+    case 'P1':
+      return 'danger';
+    case 'P2':
+      return 'warning';
+    case 'P3':
+      return 'info';
     default:
       return 'neutral';
   }

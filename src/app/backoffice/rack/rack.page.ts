@@ -170,6 +170,7 @@ const MOVABLE = new Set(['PENDING_PAYMENT', 'CONFIRMED', 'CHECKED_IN']);
     .dot--success { background: var(--c-success); }
     .dot--danger { background: var(--c-danger); }
     .dot--warning { background: var(--c-warning); }
+    .dot--info { background: var(--c-info); }
     .legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; color: var(--c-text-muted); }
     .legend .bar { display: inline-block; padding: 3px 8px; margin: 0; cursor: default; }
   `,

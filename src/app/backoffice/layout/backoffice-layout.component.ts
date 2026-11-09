@@ -16,11 +16,14 @@ const NAV: NavItem[] = [
   { path: 'reservas', label: 'Reservas', role: 'RECEPTIONIST' },
   { path: 'huespedes', label: 'Huéspedes', role: 'RECEPTIONIST' },
   { path: 'limpieza', label: 'Limpieza', role: 'HOUSEKEEPING' },
+  { path: 'incidencias', label: 'Incidencias', role: 'RECEPTIONIST' },
+  { path: 'objetos-olvidados', label: 'Objetos olvidados', role: 'RECEPTIONIST' },
   { path: 'tarifas', label: 'Tarifas', role: 'RECEPTIONIST' },
   { path: 'facturas', label: 'Facturas', role: 'RECEPTIONIST' },
   { path: 'ses', label: 'SES.HOSPEDAJES', role: 'RECEPTIONIST' },
   { path: 'cerraduras', label: 'Cerraduras', role: 'RECEPTIONIST' },
   { path: 'catalogo', label: 'Catálogo', role: 'ADMIN' },
+  { path: 'listas-limpieza', label: 'Listas de limpieza', role: 'ADMIN' },
   { path: 'canal', label: 'Channel manager', role: 'ADMIN' },
   { path: 'usuarios', label: 'Usuarios', role: 'ADMIN' },
 ];
@@ -80,8 +83,13 @@ const NAV: NavItem[] = [
     .quick input { min-height: 32px; }
     .burger { display: none; }
     .content { padding: 20px; }
+    .main { min-width: 0; }
     @media (max-width: 900px) {
-      .shell { grid-template-columns: 1fr; }
+      /* minmax(0, …): sin él, la barra superior ensancha la página más que la pantalla del móvil */
+      .shell { grid-template-columns: minmax(0, 1fr); }
+      .topbar { padding: 8px 14px; }
+      .quick { width: auto; flex: 1 1 100px; min-width: 0; }
+      .topbar .btn { flex: 0 0 auto; }
       .side { position: fixed; inset: 0 auto 0 0; width: 240px; z-index: 40; transform: translateX(-100%); transition: transform 0.2s; }
       .shell.is-open .side { transform: none; }
       .burger { display: inline-flex; }

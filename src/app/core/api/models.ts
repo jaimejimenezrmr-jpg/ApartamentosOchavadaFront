@@ -802,6 +802,19 @@ export interface DashboardResponse {
   sesReportsNeedingAction: number;
   sesReportsOverdue: number;
   currency: string;
+  operations: DashboardOperations;
+}
+
+/** Excepciones operativas del día: el panel solo muestra lo que requiere atención. */
+export interface DashboardOperations {
+  arrivalsNotReady: number;
+  tasksAwaitingInspection: number;
+  overdueTasks: number;
+  openIncidentsP1: number;
+  openIncidentsP2: number;
+  openIncidents: number;
+  openLostItems: number;
+  locksLowBattery: number;
 }
 
 // ------------------------------------------------------------------ limpieza
@@ -810,6 +823,7 @@ export interface TaskResponse {
   id: Uuid;
   roomId: Uuid;
   roomNumber: string;
+  roomName: string | null;
   roomHousekeepingStatus: HousekeepingStatus;
   reservationId: Uuid | null;
   taskType: TaskType;
@@ -818,11 +832,161 @@ export interface TaskResponse {
   scheduledDate: IsoDate;
   dueBy: IsoInstant | null;
   assignedUserId: Uuid | null;
+  assignedUserName: string | null;
   notes: string | null;
   startedAt: IsoInstant | null;
   completedAt: IsoInstant | null;
+  completedByUserId: Uuid | null;
   verifiedAt: IsoInstant | null;
+  verifiedByUserId: Uuid | null;
+  rejectionCount: number;
+  rejectionReason: string | null;
+  checksTotal: number;
+  checksDone: number;
+  photosMissing: number;
+  durationMinutes: number | null;
   version: number;
+}
+
+/** Foto guardada en el servidor: el contenido se descarga en /api/v1/backoffice/media/{id} (con sesión). */
+export interface MediaResponse {
+  id: Uuid;
+  contentType: string;
+  sizeBytes: number;
+  uploadedByUserId: Uuid | null;
+  createdAt: IsoInstant;
+}
+
+export interface TaskCheck {
+  id: Uuid;
+  position: number;
+  section: string | null;
+  label: string;
+  photoRequired: boolean;
+  checked: boolean;
+  checkedAt: IsoInstant | null;
+  checkedByUserId: Uuid | null;
+  comment: string | null;
+  photos: MediaResponse[];
+}
+
+export interface TaskDetail {
+  task: TaskResponse;
+  checks: TaskCheck[];
+  incidents: IncidentResponse[];
+  lostItems: LostItemResponse[];
+}
+
+export interface RoomBoardItem {
+  roomId: Uuid;
+  number: string;
+  name: string | null;
+  roomTypeName: string;
+  floor: number | null;
+  status: RoomStatus;
+  housekeepingStatus: HousekeepingStatus;
+  housekeepingUpdatedAt: IsoInstant | null;
+  occupied: boolean;
+  departureToday: boolean;
+  arrivalToday: boolean;
+  openIncidents: number;
+}
+
+// ------------------------------------------------------------------ listas de comprobación (administración)
+
+export interface ChecklistItem {
+  position?: number;
+  section: string | null;
+  label: string;
+  photoRequired: boolean;
+}
+
+export interface ChecklistTemplate {
+  id: Uuid;
+  name: string;
+  roomTypeId: Uuid | null;
+  roomTypeName: string | null;
+  active: boolean;
+  items: ChecklistItem[];
+  version: number;
+}
+
+export interface ChecklistTemplateRequest {
+  name: string;
+  roomTypeId: Uuid | null;
+  active: boolean;
+  items: ChecklistItem[];
+  version?: number;
+}
+
+// ------------------------------------------------------------------ incidencias y objetos olvidados
+
+export type IncidentPriority = 'P1' | 'P2' | 'P3' | 'P4';
+export type IncidentOrigin = 'HOUSEKEEPING' | 'STAFF' | 'GUEST';
+export type IncidentStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+
+export interface IncidentResponse {
+  id: Uuid;
+  code: string;
+  roomId: Uuid | null;
+  roomNumber: string | null;
+  roomName: string | null;
+  taskId: Uuid | null;
+  title: string;
+  description: string | null;
+  priority: IncidentPriority;
+  origin: IncidentOrigin;
+  status: IncidentStatus;
+  reportedByUserId: Uuid | null;
+  reportedByName: string | null;
+  resolution: string | null;
+  resolvedAt: IsoInstant | null;
+  closedAt: IsoInstant | null;
+  createdAt: IsoInstant;
+  photos: MediaResponse[];
+  version: number;
+}
+
+export interface IncidentRequest {
+  roomId: Uuid | null;
+  taskId: Uuid | null;
+  title: string;
+  description: string | null;
+  priority: IncidentPriority;
+  origin?: IncidentOrigin | null;
+}
+
+export type LostItemStatus = 'STORED' | 'GUEST_NOTIFIED' | 'SHIPPED' | 'COLLECTED' | 'DISCARDED';
+
+export interface LostItemResponse {
+  id: Uuid;
+  code: string;
+  roomId: Uuid | null;
+  roomNumber: string | null;
+  reservationId: Uuid | null;
+  reservationCode: string | null;
+  guestName: string | null;
+  guestEmail: string | null;
+  guestPhone: string | null;
+  taskId: Uuid | null;
+  description: string;
+  storageLocation: string | null;
+  status: LostItemStatus;
+  foundAt: IsoInstant;
+  foundByUserId: Uuid | null;
+  foundByName: string | null;
+  guestNotifiedAt: IsoInstant | null;
+  closedAt: IsoInstant | null;
+  notes: string | null;
+  photos: MediaResponse[];
+  version: number;
+}
+
+export interface LostItemRequest {
+  roomId: Uuid | null;
+  taskId: Uuid | null;
+  description: string;
+  storageLocation: string | null;
 }
 
 export interface TaskRequest {
