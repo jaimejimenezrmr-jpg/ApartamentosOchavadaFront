@@ -224,10 +224,10 @@ function normalize(text: string): string {
                 <span class="tile__body">
                   <strong>{{ s.title }}</strong>
                   <span>{{ s.description }}</span>
+                  @if (badgeOf(s); as b) {
+                    <span class="tile__badge tile__badge--{{ b.tone }}" [attr.aria-label]="b.value + ' ' + b.label">{{ b.value }} {{ b.label }}</span>
+                  }
                 </span>
-                @if (badgeOf(s); as b) {
-                  <span class="tile__badge tile__badge--{{ b.tone }}" [attr.aria-label]="b.value + ' ' + b.label">{{ b.value }} {{ b.label }}</span>
-                }
               </a>
             }
           </div>
@@ -269,15 +269,13 @@ function normalize(text: string): string {
     .tile__icon { font-size: 1.7rem; line-height: 1; flex: 0 0 auto; }
     .tile__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
     .tile__body strong { font: 600 1.05rem var(--font-display); }
-    .tile__body span { font-size: 0.86rem; color: var(--c-text-muted); }
-    .tile__badge { position: absolute; top: 10px; right: 10px; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+    .tile__body > span:not(.tile__badge) { font-size: 0.86rem; color: var(--c-text-muted); }
+    .tile__badge { align-self: flex-start; margin-top: 4px; font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; }
     .tile__badge--danger { background: var(--c-danger-soft); color: var(--c-danger); }
     .tile__badge--warning { background: var(--c-warning-soft); color: var(--c-warning); }
     .tile__badge--info { background: var(--c-info-soft); color: var(--c-info); }
-    .tile:has(.tile__badge) .tile__body { padding-right: 70px; }
     @media (max-width: 600px) {
       .top__inner, .wrap { padding-left: 16px; padding-right: 16px; }
-      .tile:has(.tile__badge) .tile__body { padding-right: 0; padding-top: 18px; }
     }
   `,
 })
