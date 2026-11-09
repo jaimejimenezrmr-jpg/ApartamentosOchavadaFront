@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Meta } from '@angular/platform-browser';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SiteConfigService } from '../../core/config/site-config.service';
 
@@ -9,6 +10,14 @@ import { SiteConfigService } from '../../core/config/site-config.service';
   template: `
     <a class="skip" href="#contenido">Saltar al contenido</a>
     <header class="header">
+      @if (site.config().testMode) {
+        <div class="test-banner" role="note">
+          <div class="container">
+            <strong>Web en pruebas.</strong> Los apartamentos todavía no están disponibles: las reservas que se hagan
+            ahora no son reales y no se cobra nada.
+          </div>
+        </div>
+      }
       <div class="container header__inner">
         <a routerLink="/" class="brand" aria-label="{{ site.config().propertyName }}, inicio">
           <span class="brand__mark" aria-hidden="true">O</span>
@@ -64,6 +73,8 @@ import { SiteConfigService } from '../../core/config/site-config.service';
     .skip:focus { left: 8px; }
     .header { background: var(--c-surface); border-bottom: 1px solid var(--c-border); position: sticky; top: 0; z-index: 50; }
     .header__inner { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 16px; }
+    .test-banner { background: #b45309; color: #fff; font-size: 0.92rem; line-height: 1.4; padding: 8px 0; text-align: center; }
+    .test-banner strong { text-transform: uppercase; letter-spacing: 0.04em; margin-right: 4px; }
     .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--c-text); }
     .brand__mark { width: 34px; height: 34px; border-radius: 50%; background: var(--c-brand); color: #fff;
       display: grid; place-items: center; font: 600 1.1rem var(--font-display); }
@@ -77,7 +88,8 @@ import { SiteConfigService } from '../../core/config/site-config.service';
     .footer__inner { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); overflow-wrap: anywhere; }
     @media (max-width: 760px) {
       .menu-toggle { display: block; }
-      .nav { display: none; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; align-items: stretch;
+      .test-banner { font-size: 0.82rem; padding: 6px 0; }
+      .nav { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch;
         background: var(--c-surface); border-bottom: 1px solid var(--c-border); padding: 12px 16px 16px; gap: 12px; }
       .nav.is-open { display: flex; }
     }
@@ -86,4 +98,11 @@ import { SiteConfigService } from '../../core/config/site-config.service';
 export class PublicLayoutComponent {
   protected readonly site = inject(SiteConfigService);
   protected readonly menuOpen = signal(false);
+
+  constructor() {
+    // Mientras la web está en pruebas, que los buscadores no la indexen.
+    if (this.site.config().testMode) {
+      inject(Meta).updateTag({ name: 'robots', content: 'noindex, nofollow' });
+    }
+  }
 }

@@ -16,6 +16,11 @@ export interface SiteConfig {
   tourismRegistry: string;
   checkInTime: string;
   checkOutTime: string;
+  /**
+   * Web en pruebas (`SITE_TEST_MODE=true`): todo funciona, pero se avisa en todas las páginas de que los
+   * apartamentos aún no están disponibles y de que las reservas no son reales. Se quita en el lanzamiento.
+   */
+  testMode: boolean;
 }
 
 export const DEFAULT_SITE_CONFIG: SiteConfig = {
@@ -28,6 +33,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   tourismRegistry: '',
   checkInTime: '15:00',
   checkOutTime: '11:00',
+  testMode: false,
 };
 
 /** Variables de entorno del servidor SSR → configuración del sitio. */
@@ -43,6 +49,7 @@ export function siteConfigFromEnv(env: Record<string, string | undefined>): Site
     tourismRegistry: pick('PROPERTY_TOURISM_REGISTRY', DEFAULT_SITE_CONFIG.tourismRegistry),
     checkInTime: pick('PROPERTY_CHECK_IN_TIME', DEFAULT_SITE_CONFIG.checkInTime),
     checkOutTime: pick('PROPERTY_CHECK_OUT_TIME', DEFAULT_SITE_CONFIG.checkOutTime),
+    testMode: pick('SITE_TEST_MODE', 'false').toLowerCase() === 'true',
   };
 }
 

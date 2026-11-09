@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { CheckoutResponse } from '../../core/api/models';
 import { PublicApiService } from '../../core/api/public-api.service';
 import { problemMessage } from '../../core/api/problem';
+import { SiteConfigService } from '../../core/config/site-config.service';
 import { CheckoutStepsComponent } from './checkout-steps.component';
 import { CheckoutStoreService } from './checkout-store.service';
 
@@ -39,6 +40,13 @@ import { CheckoutStoreService } from './checkout-store.service';
         <div class="layout">
           <section class="card stack">
             <h1>Pago seguro</h1>
+            @if (site.config().testMode) {
+              <div class="alert alert--warning" role="note">
+                <strong>Pago de prueba: no se cobra nada.</strong> Los apartamentos aún no están disponibles y esta
+                reserva no es real. Para simular el pago use la tarjeta <strong>4242 4242 4242 4242</strong>, cualquier
+                fecha futura y cualquier CVC.
+              </div>
+            }
             @if (expired()) {
               <div class="alert alert--danger">
                 El tiempo para completar el pago ha terminado y la reserva se ha liberado.
@@ -95,6 +103,7 @@ export class CheckoutPaymentPage implements OnInit {
   private readonly api = inject(PublicApiService);
   private readonly store = inject(CheckoutStoreService);
   private readonly router = inject(Router);
+  protected readonly site = inject(SiteConfigService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly host = viewChild<ElementRef<HTMLElement>>('paymentElement');
 

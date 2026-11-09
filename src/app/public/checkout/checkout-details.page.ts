@@ -12,6 +12,7 @@ import { countries } from '../../shared/countries';
 import { MEAL_PLAN } from '../../shared/labels';
 import { validateStay } from '../shared/search-form.component';
 import { CheckoutStoreService } from './checkout-store.service';
+import { SiteConfigService } from '../../core/config/site-config.service';
 import { CheckoutStepsComponent } from './checkout-steps.component';
 
 const PHONE = /^\+?[0-9 ()-]{6,30}$/;
@@ -38,6 +39,12 @@ const PHONE = /^\+?[0-9 ()-]{6,30}$/;
         <div class="layout">
           <form class="card stack" [formGroup]="form" (ngSubmit)="submit()" novalidate>
             <h1>Sus datos</h1>
+            @if (site.config().testMode) {
+              <div class="alert alert--warning" role="note">
+                <strong>Reserva de prueba.</strong> La web está en pruebas y los apartamentos aún no están disponibles.
+                Esta reserva no será real ni garantiza alojamiento.
+              </div>
+            }
             <p class="muted small">Los usaremos para la confirmación y el acceso a «Mi estancia». Los campos con * son obligatorios.</p>
             <div class="grid-3" formGroupName="guest">
               <div class="field">
@@ -152,6 +159,7 @@ export class CheckoutDetailsPage {
   private readonly api = inject(PublicApiService);
   private readonly store = inject(CheckoutStoreService);
   private readonly router = inject(Router);
+  protected readonly site = inject(SiteConfigService);
   private readonly fb = inject(NonNullableFormBuilder);
   protected readonly mealPlan = MEAL_PLAN;
   protected readonly countryList = countries();
