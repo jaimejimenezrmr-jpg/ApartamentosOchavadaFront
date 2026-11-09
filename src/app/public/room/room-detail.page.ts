@@ -139,7 +139,7 @@ export class RoomDetailPage {
       if (r) {
         this.activePhoto.set(0);
         this.title.setTitle(`${r.name} · ${this.site.config().propertyName}`);
-        this.meta.updateTag({ name: 'description', content: r.shortDescription ?? `${r.name} junto a la Plaza Ochavada de Aguilar de la Frontera (Córdoba).` });
+        this.meta.updateTag({ name: 'description', content: r.shortDescription ?? `${r.name} junto a la Plaza Octogonal de Aguilar de la Frontera (Córdoba).` });
         if (r.photos[0]) {
           this.meta.updateTag({ property: 'og:image', content: r.photos[0].url });
         }

@@ -15,9 +15,9 @@ import { SearchFormComponent } from '../shared/search-form.component';
     <section class="hero">
       <div class="container hero__inner">
         <p class="hero__eyebrow">Aguilar de la Frontera · Córdoba</p>
-        <h1>Apartamentos junto a la Plaza Ochavada</h1>
+        <h1>Apartamentos junto a la Plaza Octogonal</h1>
         <p class="hero__lead">
-          Apartamentos turísticos a un paso de la Plaza Ochavada, una de las pocas plazas octogonales de España, en el
+          Apartamentos turísticos a un paso de la Plaza Octogonal, una de las pocas plazas de ocho lados de España, en el
           corazón de la Campiña cordobesa. Reserve directamente con nosotros: mejor precio, sin comisiones y con acceso
           digital a su apartamento.
         </p>
@@ -45,12 +45,12 @@ import { SearchFormComponent } from '../shared/search-form.component';
     <section class="container section" id="entorno" aria-labelledby="entorno-titulo">
       <div class="place">
         <div>
-          <h2 id="entorno-titulo">La Plaza Ochavada</h2>
+          <h2 id="entorno-titulo">La Plaza Octogonal</h2>
           <p>
-            Oficialmente Plaza de San José, todo el mundo la conoce como <strong>la Ochavada</strong> por su planta de ocho
-            lados. Proyectada en 1806 con trazado neoclásico, es uno de los escasos ejemplos de plaza octogonal que existen
-            en España y el corazón de la vida de Aguilar de la Frontera: en ella se encuentra el Ayuntamiento y en sus
-            calles cercanas, nuestros apartamentos.
+            Oficialmente Plaza de San José, en Aguilar todos la llamamos <strong>la Plaza Octogonal</strong> por su planta
+            de ocho lados (en algunas guías aparece también como Plaza Ochavada). Proyectada en 1806 con trazado
+            neoclásico, es uno de los escasos ejemplos de plaza octogonal que existen en España y el corazón de la vida de
+            Aguilar de la Frontera: en ella se encuentra el Ayuntamiento y en sus calles cercanas, nuestros apartamentos.
           </p>
           <p class="muted">{{ site.config().address }}</p>
         </div>
@@ -83,7 +83,7 @@ import { SearchFormComponent } from '../shared/search-form.component';
         </div>
         <div class="card card--flat">
           <h3>En pleno centro</h3>
-          <p class="muted">Junto a la Plaza Ochavada y la Torre del Reloj, cerca de la parroquia del Soterraño y a unos
+          <p class="muted">Junto a la Plaza Octogonal y la Torre del Reloj, cerca de la parroquia del Soterraño y a unos
             minutos en coche de la Laguna de Zóñar.</p>
         </div>
       </div>
@@ -105,6 +105,8 @@ import { SearchFormComponent } from '../shared/search-form.component';
     .sights p { margin: 0; }
     @media (max-width: 860px) { .place { grid-template-columns: 1fr; } }
     .perks { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    /* En la cuadrícula el espaciado lo da gap: sin esto, el margen global .card + .card acorta las tarjetas 2 y 3 */
+    .perks .card + .card { margin-top: 0; }
   `,
 })
 export class HomePage {
@@ -117,7 +119,7 @@ export class HomePage {
     inject(Title).setTitle(`${site.propertyName} · Apartamentos turísticos en Aguilar de la Frontera`);
     inject(Meta).updateTag({
       name: 'description',
-      content: 'Apartamentos turísticos junto a la Plaza Ochavada de Aguilar de la Frontera (Córdoba). Reserva directa, llegada autónoma y el mejor precio.',
+      content: 'Apartamentos turísticos junto a la Plaza Octogonal (Plaza de San José) de Aguilar de la Frontera (Córdoba). Reserva directa, llegada autónoma y el mejor precio.',
     });
   }
 
