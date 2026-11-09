@@ -94,6 +94,7 @@ import { CheckoutStoreService } from './checkout-store.service';
   styles: `
     .page { padding-top: 24px; }
     .layout { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+    .layout > .card + .card { margin-top: 0; }
     .payment-element { min-height: 40px; }
     .payment-element.is-loading { min-height: 0; }
     @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } }

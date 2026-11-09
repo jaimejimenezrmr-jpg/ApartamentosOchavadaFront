@@ -147,6 +147,7 @@ const PHONE = /^\+?[0-9 ()-]{6,30}$/;
   styles: `
     .page { padding-top: 24px; }
     .layout { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+    .layout > .card + .card { margin-top: 0; }
     .summary { position: sticky; top: 84px; }
     .summary hr { border: 0; border-top: 1px solid var(--c-border); margin: 14px 0; }
     .total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; font-size: 1.05rem; }

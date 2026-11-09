@@ -58,7 +58,10 @@ import { DOOR_REASON, SELF_CHECKIN_BLOCKER } from './guest-labels';
   `,
   styles: `
     .doors { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-    .door { text-align: center; }
+    /* En la cuadrícula el espaciado lo da gap: sin esto, el margen global .card + .card desiguala las tarjetas */
+    .doors .card + .card { margin-top: 0; }
+    .door { text-align: center; display: flex; flex-direction: column; }
+    .door .btn { margin-top: auto; }
     .door--off { opacity: 0.75; }
     .blockers { margin: 0; padding-left: 18px; }
   `,
